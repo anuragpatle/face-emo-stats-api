@@ -9,7 +9,8 @@ app.use(bodyParser.urlencoded({
 
 app.use(express.json());
 
-const route = require('./router')
+const route = require('./router');
+const { response } = require("express");
 
 app.listen(5000, () => {
  console.log("Server running on port 5000");
@@ -38,16 +39,21 @@ app.get("/",(req,res) => {
 });
 
 app.post('/facial-senti-api/raw_sentiments', (req, res)=>{
-    insertIntoEmpEmotions(req.body)
+    insertIntoEmpEmotions(req.body);
     res.sendStatus(200);
 })
 
 // Insert new emp
 app.post('/facial-senti-api/add_emp', (req, res) =>{
-    insertIntoEmp(req.body)
+    insertIntoEmp(req.body);
     res.sendStatus(200);
 })
 
+app.get('/facial-senti-api/get_emotion_records/', (req, res) => {
+    pageIndex = parseInt(req.query.page_index);
+    pageSize = parseInt(req.query.page_size)
+    selectEmpEmotions(pageIndex, pageSize, res);
+})
 
 function insertIntoEmp(data) {
     let insertQuery = 'INSERT INTO ?? (??,??) VALUES (?,?)';
@@ -78,6 +84,25 @@ function insertIntoEmpEmotions(data) {
         }
         // rows added
         console.log(response.insertId);
+    });
+}
+
+function selectEmpEmotions(pageIndex, pageSize, res) {
+
+    rowStartIndex = pageIndex * pageSize;
+
+    // let selectQuery = 'SELECT * FROM ?? where ?? >= ? and ?? <=?';
+    let selectQuery = "SELECT * FROM ?? order by ?? desc limit ?,?";
+    let query = mysql.format(selectQuery, ["emp_emotions", "id",  pageIndex, pageSize]);
+    console.log("query: " + query)
+    pool.query(query,(err, data) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        // rows fetch
+        // console.log(data);
+        res.json(data);
     });
 }
 
