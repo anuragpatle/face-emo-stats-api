@@ -29,8 +29,7 @@ const pool = mysql.createPool({
 
 
 app.post('/facial-senti-api/raw_sentiments', (req, res) => {
-    insertIntoEmpEmotions(req.body);
-    res.sendStatus(200);
+    insertIntoEmpEmotions(req.body, res);
 })
 
 // Insert new emp
@@ -79,18 +78,20 @@ function insertIntoEmp(data, res) {
     });
 }
 
-function insertIntoEmpEmotions(data) {
-    let insertQuery = 'INSERT INTO ?? (??,??,??,??,??,??,??,??,??,??,??) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
+function insertIntoEmpEmotions(data, res) {
+    let insertQuery = 'INSERT INTO ?? (??,??,??,??,??,??,??,??,??,??,??,??) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
     
     let query = mysql.format(insertQuery,["emp_emotions",
-    "emp_id", "angry", "fear", "happy", "neutral", "sad", "surprised","date", "time", "overall_sentiment", "day_overall_emotion_processed_status",
-    data.emp_id, data.emotion_scores.Angry, data.emotion_scores.Fear, data.emotion_scores.Happy, data.emotion_scores.Neutral, data.emotion_scores.Sad, data.emotion_scores.Surprised, data.date, data.time, data.overall_sentiment, "TO_BE_DONE"]);
+    "emp_id", "angry", "fear", "happy", "neutral", "sad", "surprised","date", "time", "overall_sentiment", "day_overall_emotion_processed_status", "device_id",
+    data.emp_id, data.emotion_scores.Angry, data.emotion_scores.Fear, data.emotion_scores.Happy, data.emotion_scores.Neutral, data.emotion_scores.Sad, data.emotion_scores.Surprised, data.date, data.time, data.overall_sentiment, "TO_BE_DONE", data.device_id]);
     pool.query(query,(err, response) => {
         if(err) {
             console.error(err);
+            res.status(500).send({ error: "Internal server error" });
             return;
         }
         // rows added
+        res.status(200).send({ Msg: "Query executed Successfully" });
         console.log(response.insertId);
     });
 }
@@ -99,16 +100,16 @@ function selectEmpEmotions(pageIndex, pageSize, res) {
 
     rowStartIndex = pageIndex * pageSize;
 
-    let selectQuery = "SELECT * FROM ?? AS t1 INNER JOIN ?? AS t2 ON t2.emp_id = t1.emp_id order by t2.id DESC LIMIT ?,?";
-    let query = mysql.format(selectQuery, ["emp_details", "emp_emotions",  pageIndex, pageSize]);
+    let selectQuery = "SELECT * FROM ?? AS t1 INNER JOIN ?? AS t2 INNER JOIN ?? AS t3 ON t2.emp_id = t1.emp_id and t3.device_id = t2.device_id order by t2.id DESC LIMIT ?,?";
+    let query = mysql.format(selectQuery, ["emp_details", "emp_emotions", "iot_device_details", pageIndex, pageSize]);
     console.log("query: " + query)
     pool.query(query,(err, data) => {
         if(err) {
             console.error(err);
+            res.status(500).send({ error: "Internal server error" });
             return;
         }
-        // rows fetch
-        // console.log(data);
+        // rows added
         res.json(data);
     });
 }
@@ -168,7 +169,7 @@ function getSentiment(emp_id, date, empExitingOrEntering) {
     let inTimeSentimentQuery =  mysql.format("select overall_sentiment from (select * from face_emotion_stats.emp_emotions \
         where emp_id = " + emp_id + " and date = '" + date + "') as t1 order by time "+ orderBy +" limit 1");
 
-    console.log("In time emo query: " + inTimeSentimentQuery);
+    console.log("In/Out time emo query: " + inTimeSentimentQuery);
 
     pool.query(inTimeSentimentQuery, (err, data) => {
         if(err) {
