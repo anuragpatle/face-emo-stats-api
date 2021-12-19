@@ -284,6 +284,7 @@ async function processDaySentiment() {
             console.log("B%%")
             if (numberOfTimesAPersonAppeared < 2) {
                 console.log("###" + numberOfTimesAPersonAppeared);
+                updateProcessedDaySentiment(daySentimentObj, connection); // Update that single entry of intime. This is the case when face is not captured while outtime.
                 return true; // return true = true
                              // return false = break
             } 
@@ -451,3 +452,5 @@ cron.schedule('30 11 * * *', function() { // runs 11:30 am every day
         console.error(err.message)
     }
 });
+
+processDaySentiment();
