@@ -15,7 +15,7 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-async function sendMail() {
+async function sendMoreThan50PercentNotHappyMail() {
   try {
     const accessToken = await oAuth2Client.getAccessToken();
 
@@ -35,9 +35,11 @@ async function sendMail() {
       // from: 'SENDER NAME <yours authorised email address@gmail.com>',
       from: 'Anurag <anurag.ap6@gmail.com>',
       to: 'anurag.ap6@gmail.com',
-      subject: 'Hello from gmail using API',
-      text: 'Hello from gmail email using API',
-      html: '<h1>Hello from gmail email using API</h1>',
+      subject: 'Employee Sentiment API',
+      text: "Hi,\nMore than 50% employees are likely not happy today.",
+      html: '<h2>Hi,<br></h2> \
+              <h2>More than 50% employees are likely not happy today.<br></h2> \
+              <h3> Please visit <a href="http://www.xyz.com"> for more information.</h3>',
     };
 
     const result = await transport.sendMail(mailOptions);
@@ -47,6 +49,8 @@ async function sendMail() {
   }
 }
 
-sendMail()
-  .then((result) => console.log('Email sent...', result))
-  .catch((error) => console.log(error.message));
+// sendMoreThan50PercentNotHappyMail()
+//   .then((result) => console.log('Email sent...', result))
+//   .catch((error) => console.log(error.message));
+
+  module.exports = sendMoreThan50PercentNotHappyMail;

@@ -38,11 +38,12 @@ COMMENT = 'Algorithm\n\nCalculate final result in the following manner.\n\n \n\n
 # Backup and restore the database
 
 GoTo: C:\Program Files\MySQL\MySQL Server 8.0\bin
-mysqldump -u root -p face_emotion_stats > face_emotion_stats_dump.sql
 
-mysql -u root -p face_emotion_stats < face_emotion_stats_dump.sql
+`mysqldump -u root -p face_emotion_stats > face_emotion_stats_dump.sql`
 
-mysql -u root -p face_emotion_stats < "C:\Users\anurag\Documents\MyProjects\FaceEmotionStats-Processor\face-emo-stats-api\face_emotion_stats_dump.sql"
+`mysql -u root -p face_emotion_stats < face_emotion_stats_dump.sql`
+
+`mysql -u root -p face_emotion_stats < "C:\Users\anurag\Documents\MyProjects\FaceEmotionStats-Processor\face-emo-stats-api\face_emotion_stats_dump.sql"`
 
 
 select overall_sentiment, time from (select * from `face_emotion_stats`.`emp_emotions` where emp_id = 98767876 and date =  '2021-12-7') as t1 order by time desc limit 1;
